@@ -1,0 +1,653 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "rp.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/requests": {
+      "post": {
+        "summary": "Creates new request.\nCall requires authorization.",
+        "operationId": "Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/rpCreateResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/rpCreateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Requests"
+        ]
+      }
+    },
+    "/v1/requests/{request_id}": {
+      "get": {
+        "summary": "Returns request when result is ready (blocking call).\nCall requires authorization.",
+        "operationId": "GetResult",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/rpGetResultResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Requests"
+        ]
+      }
+    },
+    "/v1/requests/{request_id}/status": {
+      "get": {
+        "summary": "Returns request status (non-blocking call).\nThis call does not require authorization.",
+        "operationId": "GetStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/rpGetStatusResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Requests"
+        ]
+      }
+    },
+    "/v1/requests/{request_id}:cancel": {
+      "post": {
+        "summary": "Cancels in-flight request.\nCall requires authorization.",
+        "operationId": "Cancel",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/rpCancelResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Requests"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "CreateRequestAuthentication": {
+      "type": "object",
+      "properties": {
+        "verified_only": {
+          "type": "boolean",
+          "format": "boolean",
+          "title": "If set, only verifie user will be able authenticate himself"
+        }
+      }
+    },
+    "CreateRequestDeviceKey": {
+      "type": "object",
+      "properties": {
+        "key_id": {
+          "type": "string"
+        },
+        "use_new_devices": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "known_device_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "register_key": {
+          "$ref": "#/definitions/DeviceKeyRegisterKey"
+        }
+      }
+    },
+    "CreateRequestKYC": {
+      "type": "object",
+      "properties": {
+        "files_format": {
+          "$ref": "#/definitions/rpFileFormat",
+          "description": "Choose whether to embed PDF files in the KYC request or supply download links.\nEmbedded files would be encoded in base64 in REST response.\nDefault is to supply download links."
+        }
+      }
+    },
+    "CreateRequestPassword": {
+      "type": "object",
+      "properties": {
+        "key_id": {
+          "type": "string"
+        },
+        "group_id": {
+          "type": "string"
+        }
+      }
+    },
+    "CreateRequestSignature": {
+      "type": "object",
+      "properties": {
+        "serialization": {
+          "$ref": "#/definitions/rpSerialization",
+          "title": "What format is needed for the RP (protobuf or json)"
+        },
+        "invisible_data": {
+          "type": "string",
+          "format": "byte",
+          "description": "Opaque data that will be copied in the signature response.\nThis field is not seen by the user."
+        },
+        "verified_only": {
+          "type": "boolean",
+          "format": "boolean",
+          "title": "If set, only verifie user will be able sign request"
+        }
+      }
+    },
+    "DeviceKeyRegisterKey": {
+      "type": "string",
+      "enum": [
+        "KEEP",
+        "REPLACE",
+        "ADD",
+        "CLEAR"
+      ],
+      "default": "KEEP"
+    },
+    "GetFileRequestFileType": {
+      "type": "string",
+      "enum": [
+        "FILE_TYPE_UNSPECIFIED",
+        "KYC_PDF",
+        "RESIDENCY_PROOF_PDF"
+      ],
+      "default": "FILE_TYPE_UNSPECIFIED"
+    },
+    "GetResultResponseAuthenticationResult": {
+      "type": "object",
+      "properties": {
+        "jwt": {
+          "type": "string",
+          "description": "JWT token for the user that is signed by Auth eID."
+        },
+        "is_verified": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": "Shows if account is verified or not."
+        }
+      }
+    },
+    "GetResultResponseIdentificationResult": {
+      "type": "object",
+      "properties": {
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "gender": {
+          "type": "string",
+          "title": "Gender (could be M or F or empty if not set in the passport)"
+        },
+        "date_of_birth": {
+          "type": "string",
+          "title": "In ISO 8601 format (ie 2018-12-31)"
+        },
+        "nationality": {
+          "type": "string",
+          "title": "ISO 3166-1 alpha-3"
+        },
+        "personal_number": {
+          "type": "string",
+          "title": "Personal number from passport optional field"
+        },
+        "residency_country": {
+          "type": "string",
+          "title": "Residency country in ISO 3166-1 alpha-3 format"
+        },
+        "residency_city": {
+          "type": "string",
+          "title": "Residency city"
+        },
+        "residency_postcode": {
+          "type": "string",
+          "title": "Residency postcode"
+        },
+        "residency_address": {
+          "type": "string",
+          "title": "Residency address"
+        },
+        "residency_address2": {
+          "type": "string",
+          "title": "Residency address line 2"
+        },
+        "user_pub_key": {
+          "type": "string",
+          "format": "byte",
+          "title": "User's public key"
+        }
+      }
+    },
+    "GetResultResponseKYCResult": {
+      "type": "object",
+      "properties": {
+        "identification": {
+          "$ref": "#/definitions/GetResultResponseIdentificationResult"
+        },
+        "passport_issuing_state": {
+          "type": "string",
+          "title": "ISO 3166-1 alpha-3"
+        },
+        "passport_number": {
+          "type": "string",
+          "title": "Passport number"
+        },
+        "passport_expiration": {
+          "type": "string",
+          "title": "Passport expiration date in ISO 8601 format (ie 2018-12-31)"
+        },
+        "screening_EU": {
+          "$ref": "#/definitions/KYCResultScreeningResult",
+          "description": "Screening result in EU sanctions lists."
+        },
+        "screening_UN": {
+          "$ref": "#/definitions/KYCResultScreeningResult",
+          "description": "Screening result in UN sanctions lists."
+        },
+        "screening_PEP": {
+          "$ref": "#/definitions/KYCResultScreeningResult",
+          "description": "Screening result in politically exposed person (PEP) lists."
+        },
+        "screening_EU_info": {
+          "type": "string",
+          "title": "More info if match found in EU sanctions lists"
+        },
+        "screening_UN_info": {
+          "type": "string",
+          "title": "More info if match found in UN sanctions lists"
+        },
+        "screening_PEP_info": {
+          "type": "string",
+          "title": "More info if match found in PEP lists"
+        },
+        "phone_number": {
+          "type": "string",
+          "title": "Verified phone number"
+        },
+        "kyc_pdf": {
+          "$ref": "#/definitions/rpFile",
+          "title": "PDF file with KYC details"
+        },
+        "residency_proof_pdf": {
+          "$ref": "#/definitions/rpFile",
+          "title": "PDF file with residency proof details"
+        }
+      }
+    },
+    "GetResultResponseSignatureResult": {
+      "type": "object",
+      "properties": {
+        "serialization": {
+          "$ref": "#/definitions/rpSerialization"
+        },
+        "signature_data": {
+          "type": "string",
+          "format": "byte",
+          "title": "SignatureData serialized in JSON or Protobuf format (depending on type requested)"
+        },
+        "sign": {
+          "type": "string",
+          "format": "byte",
+          "description": "User's sign of signature_data."
+        },
+        "user_pub_key": {
+          "type": "string",
+          "format": "byte",
+          "description": "Public key used to sign data."
+        },
+        "is_verified": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": "Shows if account is verified or not."
+        }
+      }
+    },
+    "KYCResultScreeningResult": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "MATCH_FOUND",
+        "NO_MATCH_FOUND"
+      ],
+      "default": "UNKNOWN"
+    },
+    "rpCancelResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "OBSOLETE_status": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "OBSOLETE_error_msg": {
+          "type": "string"
+        }
+      }
+    },
+    "rpCreateRequest": {
+      "type": "object",
+      "properties": {
+        "idempotent_key": {
+          "type": "string",
+          "description": "If non-empty then create request could be safely resent in case of networking errors\nand only one request will be sent to the user."
+        },
+        "type": {
+          "$ref": "#/definitions/rpRequestType",
+          "description": "Select request type. Mandatory field."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the user. Mandatory field.\nUsers could have up to 3 different email addresses and also could change them."
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Request timeout in seconds from 10 to 600 seconds. Default is 60 seconds."
+        },
+        "title": {
+          "type": "string",
+          "description": "Request title. Maximum is 100 unicode symbols. Mandatory field."
+        },
+        "description": {
+          "type": "string",
+          "description": "Request description. Maximum is 255 unicode symbols (and 3 lines)."
+        },
+        "ra_pub_key": {
+          "type": "string",
+          "format": "byte",
+          "title": "Internal field"
+        },
+        "device_key": {
+          "$ref": "#/definitions/CreateRequestDeviceKey",
+          "description": "Info specific to device key requests."
+        },
+        "password": {
+          "$ref": "#/definitions/CreateRequestPassword",
+          "description": "Info specific to password requests."
+        },
+        "authenticate": {
+          "$ref": "#/definitions/CreateRequestAuthentication",
+          "description": "Info specific to authenticate requests."
+        },
+        "signature": {
+          "$ref": "#/definitions/CreateRequestSignature",
+          "description": "Info specific to signature requests."
+        },
+        "kyc": {
+          "$ref": "#/definitions/CreateRequestKYC",
+          "description": "Info specific to KYC requests."
+        },
+        "OBSOLETE_api_key": {
+          "type": "string"
+        }
+      }
+    },
+    "rpCreateResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": "Will be set to true if request was successfuly created."
+        },
+        "request_id": {
+          "type": "string",
+          "description": "Request ID."
+        },
+        "timestamp": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Timestamp when request was created (number of seconds\nthat have elapsed since 1 January 1970 UTC)"
+        },
+        "OBSOLETE_status": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "OBSOLETE_error_msg": {
+          "type": "string"
+        }
+      }
+    },
+    "rpFile": {
+      "type": "object",
+      "properties": {
+        "download_link": {
+          "type": "string"
+        },
+        "embedded": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "rpFileFormat": {
+      "type": "string",
+      "enum": [
+        "DOWNLOAD_LINK",
+        "EMBEDDED"
+      ],
+      "default": "DOWNLOAD_LINK"
+    },
+    "rpGetFileResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "file_type": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "data": {
+          "type": "string",
+          "format": "byte"
+        },
+        "OBSOLETE_status": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "OBSOLETE_error_msg": {
+          "type": "string"
+        }
+      }
+    },
+    "rpGetResultResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "status": {
+          "$ref": "#/definitions/rpRequestStatus"
+        },
+        "status_code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "device_id": {
+          "type": "string"
+        },
+        "device_name": {
+          "type": "string",
+          "title": "Device name used to sign request (ie iPhone 7)"
+        },
+        "email": {
+          "type": "string",
+          "title": "Email address that was specified in the request"
+        },
+        "unique_user_id": {
+          "type": "string",
+          "title": "Unique user id (it's preserved between account restores and emails adding/removal)"
+        },
+        "idempotent_key": {
+          "type": "string",
+          "description": "Idempotent key used in create request."
+        },
+        "enc_secure_result": {
+          "type": "string",
+          "format": "byte",
+          "title": "encrypted by raPubKey serialized SecureResult"
+        },
+        "authentication": {
+          "$ref": "#/definitions/GetResultResponseAuthenticationResult"
+        },
+        "signature": {
+          "$ref": "#/definitions/GetResultResponseSignatureResult"
+        },
+        "identification": {
+          "$ref": "#/definitions/GetResultResponseIdentificationResult"
+        },
+        "kyc": {
+          "$ref": "#/definitions/GetResultResponseKYCResult"
+        },
+        "OBSOLETE_app_secure_reply_sign": {
+          "type": "string",
+          "format": "byte"
+        },
+        "OBSOLETE_app_pub_key": {
+          "type": "string",
+          "format": "byte"
+        },
+        "OBSOLETE_status": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "OBSOLETE_error_msg": {
+          "type": "string"
+        }
+      }
+    },
+    "rpGetStatusResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "status": {
+          "$ref": "#/definitions/rpRequestStatus"
+        },
+        "status_code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "OBSOLETE_status": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "OBSOLETE_error_msg": {
+          "type": "string"
+        }
+      }
+    },
+    "rpRequestStatus": {
+      "type": "string",
+      "enum": [
+        "REQUEST_STATUS_UNSPECIFIED",
+        "SUCCESS",
+        "NOT_READY",
+        "TIMEOUT",
+        "RP_CANCELLED",
+        "USER_CANCELLED",
+        "ACCOUNT_NOT_VERIFIED"
+      ],
+      "default": "REQUEST_STATUS_UNSPECIFIED",
+      "title": "- SUCCESS: Successful request result\n - NOT_READY: Result is not ready yet because user did not signed nor cancelled it\n - TIMEOUT: Request timed out\n - RP_CANCELLED: Request was cancelled from RP side\n - USER_CANCELLED: Request was cancelled from mobile app\n - ACCOUNT_NOT_VERIFIED: Account was not verified (or passport expired)"
+    },
+    "rpRequestType": {
+      "type": "string",
+      "enum": [
+        "REQUEST_TYPE_UNSPECIFIED",
+        "DEVICE_KEY",
+        "PASSWORD",
+        "AUTHENTICATION",
+        "SIGNATURE",
+        "IDENTIFICATION",
+        "KYC"
+      ],
+      "default": "REQUEST_TYPE_UNSPECIFIED",
+      "description": " - DEVICE_KEY: Device key request (internal)\n - PASSWORD: Password request (internal)\n - AUTHENTICATION: Authentication request.\n - SIGNATURE: Signature request. User signs request with his private key.\n - IDENTIFICATION: Identification request. User details will be sent in the response.\nUser must have verified account.\n - KYC: know your customer request. Contains identification requests details\nand also more passport details, sanction checks and PDF documents with those information.\nUser must have verified account."
+    },
+    "rpSerialization": {
+      "type": "string",
+      "enum": [
+        "SERIALIZATION_JSON",
+        "SERIALIZATION_PROTOBUF"
+      ],
+      "default": "SERIALIZATION_JSON"
+    }
+  }
+}

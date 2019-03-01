@@ -1,0 +1,403 @@
+syntax = "proto3";
+
+package autheid.rp;
+
+option go_package = "autheid.com/proto/rp";
+option java_package = "com.autheid.api";
+option objc_class_prefix = "AID";
+
+service Requests {
+  // Creates new request.
+  // Call requires authorization.
+  rpc Create(CreateRequest) returns (CreateResponse);
+
+  // Returns request when result is ready (blocking call).
+  // Call requires authorization.
+  rpc GetResult(GetResultRequest) returns (GetResultResponse);
+
+  // Returns request status (non-blocking call).
+  // This call does not require authorization.
+  rpc GetStatus(GetStatusRequest) returns (GetStatusResponse);
+
+  // Cancels in-flight request.
+  // Call requires authorization.
+  rpc Cancel(CancelRequest) returns (CancelResponse);
+
+  // Internal.
+  rpc GetFile(GetFileRequest) returns (GetFileResponse);
+}
+
+enum RequestType {
+  REQUEST_TYPE_UNSPECIFIED = 0;
+
+  // Device key request (internal)
+  DEVICE_KEY = 1;
+
+  // Password request (internal)
+  PASSWORD = 2;
+
+  // Authentication request.
+  AUTHENTICATION = 3;
+
+  // Signature request. User signs request with his private key.
+  SIGNATURE = 4;
+
+  // Identification request. User details will be sent in the response.
+  // User must have verified account.
+  IDENTIFICATION = 5;
+
+  // know your customer request. Contains identification requests details
+  // and also more passport details, sanction checks and PDF documents with those information.
+  // User must have verified account.
+  KYC = 6;
+}
+
+enum RequestStatus {
+  REQUEST_STATUS_UNSPECIFIED = 0;
+
+  // Successful request result
+  SUCCESS = 10000;
+
+  // Result is not ready yet because user did not signed nor cancelled it
+  NOT_READY = 20001;
+
+  // Request timed out
+  TIMEOUT = 20002;
+
+  // Request was cancelled from RP side
+  RP_CANCELLED = 20003;
+
+  // Request was cancelled from mobile app
+  USER_CANCELLED = 20004;
+
+  // Account was not verified (or passport expired)
+  ACCOUNT_NOT_VERIFIED = 20005;
+}
+
+enum Serialization {
+  SERIALIZATION_JSON = 0;
+  SERIALIZATION_PROTOBUF = 1;
+}
+
+enum FileFormat {
+  DOWNLOAD_LINK = 0;
+  EMBEDDED = 1;
+}
+
+message File {
+  oneof file {
+    string download_link = 1;
+    bytes embedded = 2;
+  }
+}
+
+message CreateRequest {
+  message DeviceKey {
+    enum RegisterKey {
+      KEEP = 0;
+      REPLACE = 1;
+      ADD = 2;
+      CLEAR = 3;
+    }
+
+    string key_id = 1;
+    bool use_new_devices = 2;
+    repeated string known_device_ids = 3;
+    RegisterKey register_key = 4;
+  }
+
+  message Password {
+    string key_id = 1;
+    string group_id = 2;
+  }
+
+  message Authentication {
+    // If set, only verifie user will be able authenticate himself
+    bool verified_only = 1;
+  }
+
+  message Signature {
+    // What format is needed for the RP (protobuf or json)
+    Serialization serialization = 1;
+
+    // Opaque data that will be copied in the signature response.
+    // This field is not seen by the user.
+    bytes invisible_data = 2;
+
+    // If set, only verifie user will be able sign request
+    bool verified_only = 3;
+  }
+
+  message KYC {
+    // Choose whether to embed PDF files in the KYC request or supply download links.
+    // Embedded files would be encoded in base64 in REST response.
+    // Default is to supply download links.
+    FileFormat files_format = 1;
+  }
+
+  // If non-empty then create request could be safely resent in case of networking errors
+  // and only one request will be sent to the user.
+  string idempotent_key = 12;
+
+  // Select request type. Mandatory field.
+  RequestType type = 2;
+
+  // Email address of the user. Mandatory field.
+  // Users could have up to 3 different email addresses and also could change them.
+  string email = 3;
+
+  // Request timeout in seconds from 10 to 600 seconds. Default is 60 seconds.
+  int32 timeout_seconds = 4;
+
+  // Request title. Maximum is 100 unicode symbols. Mandatory field.
+  string title = 5;
+
+  // Request description. Maximum is 255 unicode symbols (and 3 lines).
+  string description = 6;
+
+  // Internal field
+  bytes ra_pub_key = 7;
+
+  oneof extra {
+    // Info specific to device key requests.
+    DeviceKey device_key = 8;
+
+    // Info specific to password requests.
+    Password password = 9;
+
+    // Info specific to authenticate requests.
+    Authentication authenticate = 11;
+
+    // Info specific to signature requests.
+    Signature signature = 10;
+
+    // Info specific to KYC requests.
+    KYC kyc = 13;
+  }
+
+  string OBSOLETE_api_key = 1;
+}
+
+message CreateResponse {
+  // Will be set to true if request was successfuly created.
+  bool success = 1;
+
+  // Request ID.
+  string request_id = 3;
+
+  // Timestamp when request was created (number of seconds
+  // that have elapsed since 1 January 1970 UTC)
+  int32 timestamp = 4;
+
+  int32 OBSOLETE_status = 5;
+  string OBSOLETE_error_msg = 2;
+}
+
+message GetResultRequest {
+  string request_id = 1;
+}
+
+message GetResultResponse {
+  message SecureResult {
+    string request_id = 1;
+    int32 timestamp = 2;
+    bytes device_key = 3;
+    string password = 4;
+  }
+
+  message AuthenticationResult {
+    // JWT token for the user that is signed by Auth eID.
+    string jwt = 1;
+
+    // Shows if account is verified or not.
+    bool is_verified = 2;
+  }
+
+  message SignatureResult {
+    // Data from create request.
+    message SignatureData {
+      string email = 1;
+      string rp_name = 2;
+      string title = 3;
+      string description = 4;
+      int32 timestamp = 5;
+      int32 timeout_seconds = 6;
+      bytes ra_pub_key = 7;
+      bytes invisible_data = 8;
+    }
+
+    Serialization serialization = 1;
+
+    // SignatureData serialized in JSON or Protobuf format (depending on type requested)
+    bytes signature_data = 2;
+
+    // User's sign of signature_data.
+    bytes sign = 3;
+
+    // Public key used to sign data.
+    bytes user_pub_key = 4;
+
+    // Shows if account is verified or not.
+    bool is_verified = 5;
+  }
+
+  message IdentificationResult {
+    string first_name = 1;
+    string last_name = 2;
+
+    // Gender (could be M or F or empty if not set in the passport)
+    string gender = 3;
+
+    // In ISO 8601 format (ie 2018-12-31)
+    string date_of_birth = 4;
+
+    // ISO 3166-1 alpha-3
+    string nationality = 5;
+
+    // Personal number from passport optional field
+    string personal_number = 6;
+
+    // Residency country in ISO 3166-1 alpha-3 format
+    string residency_country = 7;
+
+    // Residency city
+    string residency_city = 8;
+
+    // Residency postcode
+    string residency_postcode = 9;
+
+    // Residency address
+    string residency_address = 10;
+
+    // Residency address line 2
+    string residency_address2 = 11;
+
+    // User's public key
+    bytes user_pub_key = 12;
+  }
+
+  message KYCResult {
+    enum ScreeningResult {
+      UNKNOWN = 0;
+      MATCH_FOUND = 1;
+      NO_MATCH_FOUND = 2;
+    }
+
+    IdentificationResult identification = 21;
+
+    // ISO 3166-1 alpha-3
+    string passport_issuing_state = 1;
+
+    // Passport number
+    string passport_number = 2;
+
+    // Passport expiration date in ISO 8601 format (ie 2018-12-31)
+    string passport_expiration = 3;
+
+    // Screening result in EU sanctions lists.
+    ScreeningResult screening_EU = 14;
+
+    // Screening result in UN sanctions lists.
+    ScreeningResult screening_UN = 15;
+
+    // Screening result in politically exposed person (PEP) lists.
+    ScreeningResult screening_PEP = 16;
+
+    // More info if match found in EU sanctions lists
+    string screening_EU_info = 17;
+
+    // More info if match found in UN sanctions lists
+    string screening_UN_info = 18;
+
+    // More info if match found in PEP lists
+    string screening_PEP_info = 19;
+
+    // Verified phone number
+    string phone_number = 20;
+
+    // PDF file with KYC details
+    File kyc_pdf = 25;
+
+    // PDF file with residency proof details
+    File residency_proof_pdf = 26;
+  }
+
+  bool success = 1;
+  RequestStatus status = 16;
+  int32 status_code = 17;
+  string request_id = 4;
+  string device_id = 3;
+  // Device name used to sign request (ie iPhone 7)
+  string device_name = 10;
+
+  // Email address that was specified in the request
+  string email = 12;
+
+  // Unique user id (it's preserved between account restores and emails adding/removal)
+  string unique_user_id = 15;
+
+  // Idempotent key used in create request.
+  string idempotent_key = 21;
+
+  oneof extra {
+    // encrypted by raPubKey serialized SecureResult
+    bytes enc_secure_result = 7;
+
+    AuthenticationResult authentication = 14;
+    SignatureResult signature = 5;
+    IdentificationResult identification = 6;
+    KYCResult kyc = 11;
+  }
+
+  bytes OBSOLETE_app_secure_reply_sign = 8;
+  bytes OBSOLETE_app_pub_key = 9;
+  int32 OBSOLETE_status = 13;
+  string OBSOLETE_error_msg = 2;
+}
+
+message CancelRequest {
+  string request_id = 1;
+}
+
+message CancelResponse {
+  bool success = 1;
+  string request_id = 3;
+
+  int32 OBSOLETE_status = 4;
+  string OBSOLETE_error_msg = 2;
+}
+
+message GetStatusRequest {
+  string request_id = 1;
+}
+
+message GetStatusResponse {
+  bool success = 1;
+  RequestStatus status = 5;
+  int32 status_code = 6;
+  string request_id = 3;
+
+  int32 OBSOLETE_status = 4;
+  string OBSOLETE_error_msg = 2;
+}
+
+message GetFileRequest {
+  enum FileType {
+    FILE_TYPE_UNSPECIFIED = 0;
+    KYC_PDF = 1;
+    RESIDENCY_PROOF_PDF = 2;
+  }
+
+  string request_id = 1;
+  FileType file_type = 2;
+}
+
+message GetFileResponse {
+  bool success = 1;
+  int32 file_type = 5;
+  string request_id = 3;
+  bytes data = 6;
+
+  int32 OBSOLETE_status = 4;
+  string OBSOLETE_error_msg = 2;
+}
