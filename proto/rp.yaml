@@ -4,14 +4,14 @@ config_version: 3
 http:
   rules:
   - selector: autheid.rp.Requests.Create
-    post: "/v1/create"
+    post: /v1/requests
     body: "*"
 
   - selector: autheid.rp.Requests.GetResult
-    get: "/v1/requests/{request_id}"
+    get: /v1/requests/{request_id}
 
   - selector: autheid.rp.Requests.GetStatus
-    get: "/v1/requests/{request_id}/status"
+    get: /v1/requests/{request_id}/status
 
   - selector: autheid.rp.Requests.Cancel
-    post: "/v1/requests/{request_id}/cancel"
+    post: /v1/requests/{request_id}/cancel

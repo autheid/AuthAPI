@@ -1,0 +1,5 @@
+include(FindProtobuf)
+find_package(Protobuf REQUIRED)
+protobuf_generate_cpp(AUTHEID_PROTO_SOURCES AUTHEID_PROTO_HEADER proto/rp.proto)
+add_library(AuthAPI ${AUTHEID_PROTO_HEADER} ${AUTHEID_PROTO_SOURCES})
+target_include_directories(AuthAPI PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
