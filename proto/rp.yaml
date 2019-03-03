@@ -14,4 +14,4 @@ http:
     get: "/v1/requests/{request_id}/status"
 
   - selector: autheid.rp.Requests.Cancel
-    post: "/v1/requests/{request_id}:cancel"
+    post: "/v1/requests/{request_id}/cancel"
