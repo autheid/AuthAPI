@@ -1,10 +1,13 @@
 #include "autheid_utils.h"
 
+#if !defined(AUTHEID_BOTAN_AMALGAMATION)
 #include <botan/auto_rng.h>
 #include <botan/bigint.h>
 #include <botan/ecdh.h>
-#include "botan/ecies.h"
-#include "botan/ecdsa.h"
+#include <botan/ecies.h>
+#include <botan/ecdsa.h>
+#endif
+
 
 namespace autheid
 {

@@ -2,7 +2,13 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+
+#if !defined(AUTHEID_BOTAN_AMALGAMATION)
 #include <botan/secmem.h>
+#else
+#include <botan_all.h>
+#endif
+
 
 namespace autheid
 {
