@@ -201,8 +201,6 @@ message CreateRequest {
     // Info specific to KYC requests.
     KYC kyc = 13;
   }
-
-  string OBSOLETE_api_key = 1;
 }
 
 message CreateResponse {
@@ -215,9 +213,6 @@ message CreateResponse {
   // Timestamp when request was created (number of seconds
   // that have elapsed since 1 January 1970 UTC)
   int32 timestamp = 4;
-
-  int32 OBSOLETE_status = 5;
-  string OBSOLETE_error_msg = 2;
 }
 
 message GetResultRequest {
@@ -375,11 +370,6 @@ message GetResultResponse {
     IdentificationResult identification = 6;
     KYCResult kyc = 11;
   }
-
-  bytes OBSOLETE_app_secure_reply_sign = 8;
-  bytes OBSOLETE_app_pub_key = 9;
-  int32 OBSOLETE_status = 13;
-  string OBSOLETE_error_msg = 2;
 }
 
 message CancelRequest {
@@ -389,9 +379,6 @@ message CancelRequest {
 message CancelResponse {
   bool success = 1;
   string request_id = 3;
-
-  int32 OBSOLETE_status = 4;
-  string OBSOLETE_error_msg = 2;
 }
 
 message GetStatusRequest {
@@ -403,9 +390,6 @@ message GetStatusResponse {
   RequestStatus status = 5;
   int32 status_code = 6;
   string request_id = 3;
-
-  int32 OBSOLETE_status = 4;
-  string OBSOLETE_error_msg = 2;
 }
 
 message GetFileRequest {
@@ -424,7 +408,4 @@ message GetFileResponse {
   int32 file_type = 5;
   string request_id = 3;
   bytes data = 6;
-
-  int32 OBSOLETE_status = 4;
-  string OBSOLETE_error_msg = 2;
 }
