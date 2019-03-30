@@ -30,11 +30,8 @@ service Requests {
 enum RequestType {
   REQUEST_TYPE_UNSPECIFIED = 0;
 
-  // Device key request (internal)
+  // Device key request
   DEVICE_KEY = 1;
-
-  // Password request (internal)
-  PASSWORD = 2;
 
   // Authentication request.
   AUTHENTICATION = 3;
@@ -122,11 +119,6 @@ message CreateRequest {
     RegisterKey register_key = 4;
   }
 
-  message Password {
-    string key_id = 1;
-    string group_id = 2;
-  }
-
   message Authentication {
     // If set, only verifie user will be able authenticate himself
     bool verified_only = 1;
@@ -178,9 +170,6 @@ message CreateRequest {
     // Info specific to device key requests.
     DeviceKey device_key = 8;
 
-    // Info specific to password requests.
-    Password password = 9;
-
     // Info specific to authenticate requests.
     Authentication authenticate = 11;
 
@@ -209,11 +198,10 @@ message GetResultRequest {
 }
 
 message GetResultResponse {
-  message SecureResult {
+  message DeviceKeyResult {
     string request_id = 1;
     int32 timestamp = 2;
     bytes device_key = 3;
-    string password = 4;
   }
 
   message AuthenticationResult {
@@ -351,13 +339,14 @@ message GetResultResponse {
   string idempotent_key = 21;
 
   oneof extra {
-    // encrypted by raPubKey serialized SecureResult
-    bytes enc_secure_result = 7;
-
     AuthenticationResult authentication = 14;
     SignatureResult signature = 5;
     IdentificationResult identification = 6;
     KYCResult kyc = 11;
+    DeviceKeyResult device_key = 22;
+
+    // encrypted by ra_pub_key serialized DeviceKeyResult
+    bytes enc_device_key = 7;
   }
 }
 
