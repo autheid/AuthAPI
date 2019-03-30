@@ -348,7 +348,6 @@ message GetResultResponse {
 
     // serialized and encrypted by ra_pub_key DeviceKeyResult
     bytes device_key_enc = 7;
-    bytes device_key_enc_sign = 23;
   }
 }
 
