@@ -202,6 +202,7 @@ message GetResultResponse {
     string request_id = 1;
     int32 timestamp = 2;
     bytes device_key = 3;
+    bytes ra_pub_key = 4;
   }
 
   message AuthenticationResult {
@@ -345,8 +346,9 @@ message GetResultResponse {
     KYCResult kyc = 11;
     DeviceKeyResult device_key = 22;
 
-    // encrypted by ra_pub_key serialized DeviceKeyResult
-    bytes enc_device_key = 7;
+    // serialized and encrypted by ra_pub_key DeviceKeyResult
+    bytes device_key_enc = 7;
+    bytes device_key_enc_sign = 23;
   }
 }
 
