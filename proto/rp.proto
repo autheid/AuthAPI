@@ -202,7 +202,7 @@ message GetResultResponse {
     string request_id = 1;
     int32 timestamp = 2;
     bytes device_key = 3;
-    bytes ra_pub_key = 4;
+    bytes ra_pub_key = 5;
   }
 
   message AuthenticationResult {
