@@ -166,6 +166,8 @@ message CreateRequest {
   // Internal field
   bytes ra_pub_key = 7;
 
+  bool use_local_account = 14;
+
   oneof extra {
     // Info specific to device key requests.
     DeviceKey device_key = 8;
