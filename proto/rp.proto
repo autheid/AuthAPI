@@ -330,9 +330,10 @@ message GetResultResponse {
   string request_id = 4;
   string device_id = 3;
   // Device name used to sign request (ie iPhone 7)
+  // Will be set only for signed requests
   string device_name = 10;
 
-  // Email address that was specified in the request
+  // Email address that was specified in the request or submitted from device for local requests
   string email = 12;
 
   // Unique user id (it's preserved between account restores and emails adding/removal)
@@ -340,6 +341,9 @@ message GetResultResponse {
 
   // Idempotent key used in create request.
   string idempotent_key = 21;
+
+  int32 timestamp_created = 23;
+  int32 timestamp_finished = 24;
 
   oneof extra {
     AuthenticationResult authentication = 14;
