@@ -191,6 +191,9 @@ message CreateResponse {
   string request_id = 3;
 
   // Timestamp when request was created (number of seconds since 1 January 1970 UTC)
+  int32 timestamp_created = 5;
+
+  // Same as timestamp_created, keeped for compatibility
   int32 timestamp = 4;
 }
 
@@ -201,7 +204,6 @@ message GetResultRequest {
 message GetResultResponse {
   message DeviceKeyResult {
     string request_id = 1;
-    int32 timestamp = 2;
     bytes device_key = 3;
     bytes ra_pub_key = 5;
   }
@@ -221,7 +223,8 @@ message GetResultResponse {
       string rp_name = 2;
       string title = 3;
       string description = 4;
-      int32 timestamp = 5;
+      int32 timestamp_created = 9;
+      int32 timestamp_finished = 5;
       int32 timeout_seconds = 6;
       bytes ra_pub_key = 7;
       bytes invisible_data = 8;
