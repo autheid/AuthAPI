@@ -233,14 +233,15 @@ message GetResultResponse {
     // SignatureData serialized in JSON or Protobuf format (depending on type requested)
     bytes signature_data = 2;
 
-    // User's sign of signature_data.
+    // User's sign of signature_data
     bytes sign = 3;
 
-    // Public key used to sign data.
-    bytes user_pub_key = 4;
-
-    // Shows if account is verified or not.
+    // Shows if account is verified or not
     bool is_verified = 5;
+
+    bytes certificate_client = 6;
+    bytes certificate_issuer = 7;
+    bytes ocsp_response = 8;
   }
 
   message IdentificationResult {
@@ -273,9 +274,6 @@ message GetResultResponse {
 
     // Residency address line 2
     string residency_address2 = 11;
-
-    // User's public key
-    bytes user_pub_key = 12;
   }
 
   message KYCResult {
