@@ -33,7 +33,7 @@ enum RequestType {
   // Device key request
   DEVICE_KEY = 1;
 
-  // Authentication request.
+  // Authentication request
   AUTHENTICATION = 3;
 
   // Signature request. User signs request with his private key.
@@ -43,8 +43,8 @@ enum RequestType {
   // User must have verified account.
   IDENTIFICATION = 5;
 
-  // know your customer request. Contains identification requests details
-  // and also more passport details, sanction checks and PDF documents with those information.
+  // Know Your Customer request. Contains identification requests details and also more passport details,
+  // sanctions and Politically Exposed Person (PEP) list checks and PDF documents with those information.
   // User must have verified account.
   KYC = 6;
 }
@@ -144,10 +144,10 @@ message CreateRequest {
   }
 
   // If non-empty then create request could be safely resent in case of networking errors
-  // and only one request will be sent to the user.
+  // and only one request will be sent to the user
   string idempotent_key = 12;
 
-  // Select request type. Mandatory field.
+  // Select request type. Mandatory field
   RequestType type = 2;
 
   // Email address of the user. Mandatory field.
@@ -169,29 +169,28 @@ message CreateRequest {
   bool use_local_account = 14;
 
   oneof extra {
-    // Info specific to device key requests.
+    // Info specific to device key requests
     DeviceKey device_key = 8;
 
-    // Info specific to authenticate requests.
+    // Info specific to authenticate requests
     Authentication authenticate = 11;
 
-    // Info specific to signature requests.
+    // Info specific to signature requests
     Signature signature = 10;
 
-    // Info specific to KYC requests.
+    // Info specific to KYC requests
     KYC kyc = 13;
   }
 }
 
 message CreateResponse {
-  // Will be set to true if request was successfuly created.
+  // Will be set to true if request was successfuly created
   bool success = 1;
 
-  // Request ID.
+  // Request ID
   string request_id = 3;
 
-  // Timestamp when request was created (number of seconds
-  // that have elapsed since 1 January 1970 UTC)
+  // Timestamp when request was created (number of seconds since 1 January 1970 UTC)
   int32 timestamp = 4;
 }
 
@@ -208,15 +207,15 @@ message GetResultResponse {
   }
 
   message AuthenticationResult {
-    // JWT token for the user that is signed by Auth eID.
+    // JWT token for the user that is signed by Auth eID
     string jwt = 1;
 
-    // Shows if account is verified or not.
+    // Shows if account is verified or not
     bool is_verified = 2;
   }
 
   message SignatureResult {
-    // Data from create request.
+    // Data from create request
     message SignatureData {
       string email = 1;
       string rp_name = 2;
@@ -294,13 +293,13 @@ message GetResultResponse {
     // Passport expiration date in ISO 8601 format (ie 2018-12-31)
     string passport_expiration = 3;
 
-    // Screening result in EU sanctions lists.
+    // Screening result in EU sanctions lists
     ScreeningResult screening_EU = 14;
 
-    // Screening result in UN sanctions lists.
+    // Screening result in UN sanctions lists
     ScreeningResult screening_UN = 15;
 
-    // Screening result in politically exposed person (PEP) lists.
+    // Screening result in politically exposed person (PEP) lists
     ScreeningResult screening_PEP = 16;
 
     // More info if match found in EU sanctions lists
