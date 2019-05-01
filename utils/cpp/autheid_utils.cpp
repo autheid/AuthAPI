@@ -91,7 +91,7 @@ SecureBytes decryptData(const void *data, size_t dataSize, const PrivateKey &pri
    }
 }
 
-Bytes signData(const void *data, size_t dataSize, const PrivateKey &privateKey)
+Bytes signData(const void *data, size_t dataSize, const PrivateKey &privateKey, bool derFormat)
 {
    try {
       Botan::AutoSeeded_RNG rng;
@@ -102,7 +102,7 @@ Bytes signData(const void *data, size_t dataSize, const PrivateKey &privateKey)
       // Clear data for security
       privateKeyValue.clear();
 
-      Botan::PK_Signer signer(privateKeyDecoded, rng, kSignAlg);
+      Botan::PK_Signer signer(privateKeyDecoded, rng, kSignAlg, derFormat ? Botan::DER_SEQUENCE : Botan::IEEE_1363);
       signer.update(static_cast<const uint8_t*>(data), dataSize);
       Bytes signature = signer.signature(rng);
 
@@ -113,14 +113,14 @@ Bytes signData(const void *data, size_t dataSize, const PrivateKey &privateKey)
 }
 
 bool verifyData(const void *data, size_t dataSize, const void *sign, size_t signSize
-   , const PublicKey &publicKey)
+   , const PublicKey &publicKey, bool derFormat)
 {
    try {
       auto publicKeyValue = Botan::OS2ECP(publicKey.data(), publicKey.size(), kDomain.get_curve());
 
       Botan::ECDSA_PublicKey publicKeyDecoded(kDomain, publicKeyValue);
 
-      Botan::PK_Verifier verifier(publicKeyDecoded, kSignAlg);
+      Botan::PK_Verifier verifier(publicKeyDecoded, kSignAlg, derFormat ? Botan::DER_SEQUENCE : Botan::IEEE_1363);
       verifier.update(static_cast<const uint8_t *>(data), dataSize);
       bool result = verifier.check_signature(static_cast<const uint8_t *>(sign), signSize);
 

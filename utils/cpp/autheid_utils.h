@@ -33,9 +33,9 @@ Bytes encryptData(const void *data, size_t dataSize, const PublicKey &publicKey)
 // Returns empty data if decrypt failed
 SecureBytes decryptData(const void *data, size_t dataSize, const PrivateKey &privateKey);
 
-Bytes signData(const void *data, size_t dataSize, const PrivateKey &privateKey);
+Bytes signData(const void *data, size_t dataSize, const PrivateKey &privateKey, bool derFormat = false);
 
 bool verifyData(const void *data, size_t dataSize, const void *sign, size_t signSize
-   , const PublicKey &publicKey);
+   , const PublicKey &publicKey, bool derFormat = false);
 
 } // namespace autheid
