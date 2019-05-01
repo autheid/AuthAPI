@@ -226,7 +226,6 @@ message GetResultResponse {
       int32 timestamp_created = 9;
       int32 timestamp_finished = 5;
       int32 timeout_seconds = 6;
-      bytes ra_pub_key = 7;
       bytes invisible_data = 8;
     }
 
