@@ -249,6 +249,9 @@ message GetResultResponse {
     string first_name = 1;
     string last_name = 2;
 
+    // Verified phone number
+    string phone_number = 12;
+
     // Gender (could be M or F or empty if not set in the passport)
     string gender = 3;
 
