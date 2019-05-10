@@ -57,7 +57,7 @@ Bytes encryptData(const void *data, size_t dataSize, const PublicKey &publicKey)
    try {
       Botan::AutoSeeded_RNG rng;
 
-      auto publicKeyDecoded = Botan::OS2ECP(publicKey.data(), publicKey.size(), kDomain.get_curve());
+      auto publicKeyDecoded = kDomain.OS2ECP(publicKey);
 
       Botan::ECIES_Encryptor encrypt(rng, kEciesParams);
 
@@ -116,7 +116,7 @@ bool verifyData(const void *data, size_t dataSize, const void *sign, size_t sign
    , const PublicKey &publicKey, bool derFormat)
 {
    try {
-      auto publicKeyValue = Botan::OS2ECP(publicKey.data(), publicKey.size(), kDomain.get_curve());
+      auto publicKeyValue = kDomain.OS2ECP(publicKey);
 
       Botan::ECDSA_PublicKey publicKeyDecoded(kDomain, publicKeyValue);
 
