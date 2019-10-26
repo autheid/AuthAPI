@@ -157,6 +157,9 @@ message CreateRequest {
   // Request timeout in seconds from 10 to 600 seconds. Default is 60 seconds.
   int32 timeout_seconds = 4;
 
+  // Internal field (and works only with DEVICE_KEY requests)
+  int32 timestamp_created = 15;
+
   // Request title. Maximum is 100 unicode symbols. Mandatory field.
   string title = 5;
 
