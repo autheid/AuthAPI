@@ -233,6 +233,7 @@ message GetResultResponse {
       string rp_name = 2;
       string title = 3;
       string description = 4;
+      string details = 10;
       int32 timestamp_created = 9;
       int32 timestamp_finished = 5;
       int32 timeout_seconds = 6;
