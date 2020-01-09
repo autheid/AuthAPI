@@ -123,9 +123,6 @@ message CreateRequest {
   message Authentication {
     // If set, only verifie user will be able authenticate himself
     bool verified_only = 1;
-
-    // Additional details for the approve screen (max 6 line and 255 symbols)
-    string details = 2;
   }
 
   message Signature {
