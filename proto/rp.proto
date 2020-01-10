@@ -117,7 +117,6 @@ message CreateRequest {
     bool use_new_devices = 2;
     repeated string known_device_ids = 3;
     RegisterKey register_key = 4;
-    string details = 5;
   }
 
   message Authentication {
@@ -135,9 +134,6 @@ message CreateRequest {
 
     // If set, only verifie user will be able sign request
     bool verified_only = 3;
-
-    // Additional details for the approve screen (max 6 line and 255 symbols)
-    string details = 4;
   }
 
   message KYC {
@@ -167,7 +163,8 @@ message CreateRequest {
   // Request title. Maximum is 100 unicode symbols. Mandatory field.
   string title = 5;
 
-  // Request description. Maximum is 255 unicode symbols (and 3 lines).
+  // Request description. Maximum is 255 unicode symbols (and 10 lines).
+  // Visible only for DEVICE_KEY and SIGNATURE requests (must be empty for other request types)
   string description = 6;
 
   // Internal field
@@ -230,7 +227,6 @@ message GetResultResponse {
       string rp_name = 2;
       string title = 3;
       string description = 4;
-      string details = 10;
       int32 timestamp_created = 9;
       int32 timestamp_finished = 5;
       int32 timeout_seconds = 6;
