@@ -55,7 +55,10 @@ enum RequestStatus {
   // Successful request result
   SUCCESS = 10000;
 
-  // Result is not ready yet because user did not signed nor cancelled it
+  // Local request is waiting for acknowledge from mobile app (QR scan or open local link)
+  WAITING_LOCAL_ACK = 20006;
+
+  // Result is not ready yet because user have not signed nor cancelled it
   NOT_READY = 20001;
 
   // Request timed out
