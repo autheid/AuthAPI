@@ -274,6 +274,9 @@ message GetResultResponse {
     // Residency country in ISO 3166-1 alpha-3 format
     string residency_country = 7;
 
+    // Residency area code (for example CA, available for USA only)
+    string residency_area = 13;
+
     // Residency city
     string residency_city = 8;
 
