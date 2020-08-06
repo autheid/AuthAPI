@@ -146,10 +146,6 @@ message CreateRequest {
     FileFormat files_format = 1;
   }
 
-  // If non-empty then create request could be safely resent in case of networking errors
-  // and only one request will be sent to the user
-  string idempotent_key = 12;
-
   // Select request type. Mandatory field
   RequestType type = 2;
 
