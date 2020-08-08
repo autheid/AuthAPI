@@ -209,6 +209,7 @@ message GetResultResponse {
     string request_id = 1;
     bytes device_key = 3;
     bytes ra_pub_key = 5;
+    string qr_secret = 6;
   }
 
   message AuthenticationResult {
