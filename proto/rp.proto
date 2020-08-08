@@ -171,6 +171,8 @@ message CreateRequest {
 
   bool use_local_account = 14;
 
+  bool disable_biometric_authorization = 16;
+
   oneof extra {
     // Info specific to device key requests
     DeviceKey device_key = 8;
