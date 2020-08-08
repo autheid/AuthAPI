@@ -169,8 +169,10 @@ message CreateRequest {
   // Internal field
   bytes ra_pub_key = 7;
 
+  // Set for QR/intra-mobile requests
   bool use_local_account = 14;
 
+  // Set to disable Face ID/fingerprints and force PIN code check
   bool disable_biometric_authorization = 16;
 
   oneof extra {
