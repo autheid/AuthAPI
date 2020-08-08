@@ -214,9 +214,9 @@ message GetResultResponse {
 
   message DeviceKeyResult {
     // serialized and encrypted by ra_pub_key DeviceKey
-    bytes device_key_enc = 1;
+    bytes device_key_enc = 10;
     // wallet key generated on server
-    bytes device_key_part2 = 2;
+    bytes device_key_part2 = 11;
   }
 
   message AuthenticationResult {
