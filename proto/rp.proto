@@ -355,9 +355,6 @@ message GetResultResponse {
   // Unique user id (it's preserved between account restores and emails adding/removal)
   string unique_user_id = 15;
 
-  // Idempotent key used in create request.
-  string idempotent_key = 21;
-
   int32 timestamp_created = 23;
   int32 timestamp_finished = 24;
 
