@@ -205,11 +205,18 @@ message GetResultRequest {
 }
 
 message GetResultResponse {
-  message DeviceKeyResult {
+  message DeviceKey {
     string request_id = 1;
     bytes device_key = 3;
     bytes ra_pub_key = 5;
     string qr_secret = 6;
+  }
+
+  message DeviceKeyResult {
+    // serialized and encrypted by ra_pub_key DeviceKey
+    bytes device_key_enc = 1;
+    // wallet key generated on server
+    bytes device_key_part2 = 2;
   }
 
   message AuthenticationResult {
@@ -360,9 +367,6 @@ message GetResultResponse {
     IdentificationResult identification = 6;
     KYCResult kyc = 11;
     DeviceKeyResult device_key = 22;
-
-    // serialized and encrypted by ra_pub_key DeviceKeyResult
-    bytes device_key_enc = 7;
   }
 }
 
