@@ -25,6 +25,9 @@ service Requests {
 
   // Internal.
   rpc GetFile(GetFileRequest) returns (GetFileResponse);
+
+  // Internal.
+  rpc GetOcsp(GetOcspRequest) returns (GetOcspResponse);
 }
 
 enum RequestType {
@@ -407,4 +410,14 @@ message GetFileResponse {
   int32 file_type = 5;
   string request_id = 3;
   bytes data = 6;
+}
+
+message GetOcspRequest {
+  string device_id = 1;
+}
+
+message GetOcspResponse {
+  bytes certificate_client = 1;
+  bytes certificate_issuer = 2;
+  bytes ocsp_response = 3;
 }
