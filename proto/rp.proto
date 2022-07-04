@@ -347,7 +347,7 @@ message GetResultResponse {
     File residency_proof_pdf = 26;
   }
 
-  bool success = 1;
+  //bool success = 1;
   RequestStatus status = 16;
   int32 status_code = 17;
   string request_id = 4;
@@ -420,4 +420,30 @@ message GetOcspResponse {
   bytes certificate_client = 1;
   bytes certificate_issuer = 2;
   bytes ocsp_response = 3;
+}
+
+message WSAsyncRequest {
+  //user defined
+  string message_id = 1;
+
+  //base64 authentication token
+  string api_key = 2;
+
+  oneof payload {
+    CreateRequest create_request = 4;
+    CancelRequest cancel_request = 5;
+  }
+}
+
+message WSAAsyncReply {
+  //returning the user defined id set in original WSAsyncRequest
+  string message_id = 1;
+
+  oneof payload {
+    CreateResponse      create_response = 8;
+    CancelResponse      cancel_response = 9;
+
+    GetStatusResponse   status_update = 10;
+    GetResultResponse   request_result = 11;
+  }
 }

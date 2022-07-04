@@ -86,7 +86,9 @@ SecureBytes decryptData(const void *data, size_t dataSize, const PrivateKey &pri
       auto result = decryptor.decrypt(static_cast<const uint8_t*>(data), dataSize);
       return result;
 
-   } catch (...){
+   } catch (const Botan::Decoding_Error& e){
+      return {};
+   } catch (const std::exception& e) {
       return {};
    }
 }
