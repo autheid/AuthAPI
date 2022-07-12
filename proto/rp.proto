@@ -152,10 +152,6 @@ message CreateRequest {
   // Select request type. Mandatory field
   RequestType type = 2;
 
-  // Email address of the user. Mandatory field.
-  // Users could have up to 3 different email addresses and also could change them.
-  string email = 3;
-
   // Request timeout in seconds from 10 to 600 seconds. Default is 60 seconds.
   int32 timeout_seconds = 4;
 
@@ -172,8 +168,19 @@ message CreateRequest {
   // Internal field
   bytes ra_pub_key = 7;
 
-  // Set for QR/intra-mobile requests
-  bool use_local_account = 14;
+
+  oneof account_identifier {
+    // Mutex field defining how the user account is resolved for this request:
+    // - email: one of the account's email
+    // - eid_unique_id: the account's eid_unique_id
+    // - use_local_account: signifies the user has to bind the request via
+    //   mobile (typically by scanning a QR code carrying the request_id)
+    //   When used, this field has to be set to 'True' for backwards compatibility
+
+    string email = 3;
+    string eid_unique_id = 20;
+    bool use_local_account = 14;
+  }
 
   // Set to disable Face ID/fingerprints and force PIN code check
   bool disable_biometric_authorization = 16;
