@@ -429,6 +429,52 @@ message GetOcspResponse {
   bytes ocsp_response = 3;
 }
 
+enum HelperType {
+  TYPE_UNKNOWN = 0;
+
+  //get eid_unique_id for email
+  GET_UNIQUE_ID = 1;
+
+  //get emails for eid_unique_id
+  GET_EMAILS = 2;
+
+  //get kyc status for account
+  GET_KYC_STATUS = 3;
+}
+
+message HelperRequest {
+  HelperType type = 1;
+
+  oneof account_identifier {
+    string email = 10;
+    string eid_unique_id = 11;
+  }
+}
+
+enum KycStatus {
+  STATUS_UNKNOWN = 0;
+
+  STATUS_EMAIL = 1;
+  STATUS_PHONE = 2;
+  STATUS_VERIFIED = 3;
+}
+
+message HelperResponse {
+  bool success = 1;
+
+  message Emails {
+    repeated string email = 20;
+  }
+
+  oneof reply {
+    string error = 2;
+
+    string eid_unique_id = 10;
+    Emails emails = 11;
+    KycStatus kyc_status = 12;
+  }
+}
+
 message WSAsyncRequest {
   //user defined
   string message_id = 1;
@@ -439,6 +485,7 @@ message WSAsyncRequest {
   oneof payload {
     CreateRequest create_request = 4;
     CancelRequest cancel_request = 5;
+    HelperRequest helper_request = 6;
   }
 }
 
@@ -452,5 +499,7 @@ message WSAAsyncReply {
 
     GetStatusResponse   status_update = 10;
     GetResultResponse   request_result = 11;
+
+    HelperResponse      helper_response = 12;
   }
 }
