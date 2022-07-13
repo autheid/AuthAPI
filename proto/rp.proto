@@ -452,11 +452,23 @@ message HelperRequest {
 }
 
 enum KycStatus {
+  //no verification steps were undertaken by user
   STATUS_UNKNOWN = 0;
 
-  STATUS_EMAIL = 1;
-  STATUS_PHONE = 2;
-  STATUS_VERIFIED = 3;
+  //user disabled by admin
+  STATUS_DISABLED = 1;
+
+  //kyc TTL expired
+  STATUS_EXPIRED = 2;
+
+  //user has verified email
+  STATUS_EMAIL = 16;
+
+  //user has verified phone number
+  STATUS_PHONE = 17;
+
+  //user has provided valid passport and proof of address
+  STATUS_VERIFIED = 20;
 }
 
 message HelperResponse {
