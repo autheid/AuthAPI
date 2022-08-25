@@ -110,6 +110,12 @@ message File {
   }
 }
 
+message JWTClaims
+{
+  string key = 1;
+  string val = 2;
+}
+
 message CreateRequest {
   message DeviceKey {
     enum RegisterKey {
@@ -126,8 +132,11 @@ message CreateRequest {
   }
 
   message Authentication {
-    // If set, only verifie user will be able authenticate himself
-    bool verified_only = 1;
+    // If set, only verify user will be able authenticate himself
+    bool               verified_only = 1;
+
+    // claims to be added to the returned JWT
+    repeated JWTClaims claims        = 2;
   }
 
   message Signature {
@@ -218,6 +227,90 @@ message GetResultRequest {
   string request_id = 1;
 }
 
+message IdentificationResult {
+  string first_name = 1;
+  string last_name = 2;
+
+  // Verified phone number
+  string phone_number = 12;
+
+  // Gender (could be M or F or empty if not set in the passport)
+  string gender = 3;
+
+  // In ISO 8601 format (ie 2018-12-31)
+  string date_of_birth = 4;
+
+  // ISO 3166-1 alpha-3
+  string nationality = 5;
+
+  // Personal number from passport optional field
+  string personal_number = 6;
+
+  // Residency country in ISO 3166-1 alpha-3 format
+  string residency_country = 7;
+
+  // Residency area code (for example CA, available for USA only)
+  string residency_area = 13;
+
+  // Residency city
+  string residency_city = 8;
+
+  // Residency postcode
+  string residency_postcode = 9;
+
+  // Residency address
+  string residency_address = 10;
+
+  // Residency address line 2
+  string residency_address2 = 11;
+}
+
+message KYCResult {
+  enum ScreeningResult {
+    UNKNOWN = 0;
+    MATCH_FOUND = 1;
+    NO_MATCH_FOUND = 2;
+  }
+
+  IdentificationResult identification = 21;
+
+  // ISO 3166-1 alpha-3
+  string passport_issuing_state = 1;
+
+  // Passport number
+  string passport_number = 2;
+
+  // Passport expiration date in ISO 8601 format (ie 2018-12-31)
+  string passport_expiration = 3;
+
+  // Screening result in EU sanctions lists
+  ScreeningResult screening_EU = 14;
+
+  // Screening result in UN sanctions lists
+  ScreeningResult screening_UN = 15;
+
+  // Screening result in politically exposed person (PEP) lists
+  ScreeningResult screening_PEP = 16;
+
+  // More info if match found in EU sanctions lists
+  string screening_EU_info = 17;
+
+  // More info if match found in UN sanctions lists
+  string screening_UN_info = 18;
+
+  // More info if match found in PEP lists
+  string screening_PEP_info = 19;
+
+  // Verified phone number
+  string phone_number = 20;
+
+  // PDF file with KYC details
+  File kyc_pdf = 25;
+
+  // PDF file with residency proof details
+  File residency_proof_pdf = 26;
+}
+
 message GetResultResponse {
   message DeviceKey {
     string request_id = 1;
@@ -268,90 +361,6 @@ message GetResultResponse {
     bytes certificate_client = 6;
     bytes certificate_issuer = 7;
     bytes ocsp_response = 8;
-  }
-
-  message IdentificationResult {
-    string first_name = 1;
-    string last_name = 2;
-
-    // Verified phone number
-    string phone_number = 12;
-
-    // Gender (could be M or F or empty if not set in the passport)
-    string gender = 3;
-
-    // In ISO 8601 format (ie 2018-12-31)
-    string date_of_birth = 4;
-
-    // ISO 3166-1 alpha-3
-    string nationality = 5;
-
-    // Personal number from passport optional field
-    string personal_number = 6;
-
-    // Residency country in ISO 3166-1 alpha-3 format
-    string residency_country = 7;
-
-    // Residency area code (for example CA, available for USA only)
-    string residency_area = 13;
-
-    // Residency city
-    string residency_city = 8;
-
-    // Residency postcode
-    string residency_postcode = 9;
-
-    // Residency address
-    string residency_address = 10;
-
-    // Residency address line 2
-    string residency_address2 = 11;
-  }
-
-  message KYCResult {
-    enum ScreeningResult {
-      UNKNOWN = 0;
-      MATCH_FOUND = 1;
-      NO_MATCH_FOUND = 2;
-    }
-
-    IdentificationResult identification = 21;
-
-    // ISO 3166-1 alpha-3
-    string passport_issuing_state = 1;
-
-    // Passport number
-    string passport_number = 2;
-
-    // Passport expiration date in ISO 8601 format (ie 2018-12-31)
-    string passport_expiration = 3;
-
-    // Screening result in EU sanctions lists
-    ScreeningResult screening_EU = 14;
-
-    // Screening result in UN sanctions lists
-    ScreeningResult screening_UN = 15;
-
-    // Screening result in politically exposed person (PEP) lists
-    ScreeningResult screening_PEP = 16;
-
-    // More info if match found in EU sanctions lists
-    string screening_EU_info = 17;
-
-    // More info if match found in UN sanctions lists
-    string screening_UN_info = 18;
-
-    // More info if match found in PEP lists
-    string screening_PEP_info = 19;
-
-    // Verified phone number
-    string phone_number = 20;
-
-    // PDF file with KYC details
-    File kyc_pdf = 25;
-
-    // PDF file with residency proof details
-    File residency_proof_pdf = 26;
   }
 
   //bool success = 1;
@@ -440,6 +449,10 @@ enum HelperType {
 
   //get kyc status for account
   GET_KYC_STATUS = 3;
+
+  //copy kyc info for user that was
+  //authenticated within the last 10min
+  COPY_KYC = 4;
 }
 
 message HelperRequest {
@@ -448,10 +461,11 @@ message HelperRequest {
   oneof account_identifier {
     string email = 10;
     string eid_unique_id = 11;
+    string jwt = 12;
   }
 }
 
-enum KycStatus {
+enum KycStatusEnum {
   //no verification steps were undertaken by user
   STATUS_UNKNOWN = 0;
 
@@ -478,12 +492,18 @@ message HelperResponse {
     repeated string email = 20;
   }
 
+  message KycStatus {
+    KycStatusEnum status = 1;
+    int32 last_updated = 2;
+  }
+
   oneof reply {
     string error = 2;
 
     string eid_unique_id = 10;
     Emails emails = 11;
     KycStatus kyc_status = 12;
+    KYCResult kyc_copy = 13;
   }
 }
 
