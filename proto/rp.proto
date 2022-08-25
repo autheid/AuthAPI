@@ -110,6 +110,12 @@ message File {
   }
 }
 
+message JWTClaims
+{
+  string key = 1;
+  string val = 2;
+}
+
 message CreateRequest {
   message DeviceKey {
     enum RegisterKey {
@@ -126,8 +132,11 @@ message CreateRequest {
   }
 
   message Authentication {
-    // If set, only verifie user will be able authenticate himself
-    bool verified_only = 1;
+    // If set, only verify user will be able authenticate himself
+    bool               verified_only = 1;
+
+    // claims to be added to the returned JWT
+    repeated JWTClaims claims        = 2;
   }
 
   message Signature {
@@ -452,10 +461,11 @@ message HelperRequest {
   oneof account_identifier {
     string email = 10;
     string eid_unique_id = 11;
+    string jwt = 12;
   }
 }
 
-enum KycStatus {
+enum KycStatusEnum {
   //no verification steps were undertaken by user
   STATUS_UNKNOWN = 0;
 
@@ -480,6 +490,11 @@ message HelperResponse {
 
   message Emails {
     repeated string email = 20;
+  }
+
+  message KycStatus {
+    KycStatusEnum status = 1;
+    int32 last_updated = 2;
   }
 
   oneof reply {
